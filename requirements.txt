@@ -1,0 +1,4 @@
+discord
+discord-ext-bot
+pyttsx3
+pydotenv
