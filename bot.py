@@ -1,3 +1,4 @@
+
 print("Loading...")
 
 #Discord
@@ -21,8 +22,6 @@ except: import dotenv ; dotenv.load_dotenv()
 prefix = '!'
 bot = commands.Bot(command_prefix = prefix)
 
-global engine
-
 engine = pyttsx3.init()
 voices = engine.getProperty('voices')
 engine.setProperty("rate", 120) # TTS Speed
@@ -37,20 +36,18 @@ bot.read_channel = 0
 #Functions
 
 def queue_player(ctx):
-    
-    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    
-    if voice and voice.is_connected():
-        if bot.queue:
+    if bot.queue:
+        voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+        if voice and voice.is_connected():
             engine.save_to_file(bot.queue[0], 'tts.mp3')
             engine.runAndWait()
             try: voice.play(discord.FFmpegPCMAudio('tts.mp3', **{'before_options': '-channel_layout mono', 'options': ['-vn', '-loglevel panic']}), after = lambda e: After(ctx))
             except Exception as e: print(e); After(ctx)
-        else: bot.queueing = 0
-    else:
-        print('Not Connected To Voice Channel')
-        bot.queue.pop(0)
-        bot.queueing = 0
+        else:
+            print('Not Connected To Voice Channel')
+            bot.queue.pop(0)
+            bot.queueing = 0
+    else: bot.queueing = 0
         
 
 def After(ctx):
@@ -61,9 +58,6 @@ def play_queue(ctx):
     if not bot.queueing:
         bot.queueing = 1
         queue_player(ctx)
-
-    
-    
 
 #-------------------------------------------------------------------------------------------
 
@@ -90,8 +84,22 @@ async def leave(ctx):
   else: await ctx.channel.send("Not Connected To Voice Channel")
 
 @bot.command()
-async def tts(ctx, num: int = 1):
+async def stop(ctx, num: int = 1):
+    
+    if num < 0: num = 1
+    elif num > len(bot.queue) or not num:
+        num = 0
+        bot.queue = []
+    
+    for i in range(num - 1): bot.queue.pop(0)
+    
+    voice = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+    
+    if voice and voice.is_playing(): voice.stop()
 
+@bot.command()
+async def tts(ctx, num: int = 1):
+    
   if num:
     bot.read_channel = ctx.channel
     await ctx.send("TTS ON")
@@ -100,7 +108,6 @@ async def tts(ctx, num: int = 1):
     bot.read_channel = 0
     await ctx.send(f"TTS OFF in {ctx.channel}")
 
-
 #-------------------------------------------------------------------------------------------
 
 #Events
@@ -108,6 +115,7 @@ async def tts(ctx, num: int = 1):
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}')
+    await bot.change_presence(activity = discord.Game(name = 'Lite'))
 
 @bot.event
 async def on_message(ctx):
@@ -126,3 +134,4 @@ async def on_message(ctx):
 #-------------------------------------------------------------------------------------------
     
 bot.run(os.environ['TOKEN'])
+
