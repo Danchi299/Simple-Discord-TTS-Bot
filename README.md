@@ -10,8 +10,8 @@ use this to install dependencies:
 	python -pip install -r requirements.txt
 
 How To:
-	1.Run Bot
-	2.Join Voice Channel and type !join
-	3.Type !tts 1 in desired text channel
+1.Run Bot
+2.Join Voice Channel and type !join
+3.Type !tts 1 in desired text channel
 
 any message in that channel will be read in voice chat
