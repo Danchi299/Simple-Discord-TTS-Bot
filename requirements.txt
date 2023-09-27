@@ -3,3 +3,4 @@ discord-ext-bot
 PyNaCl
 pyttsx3
 pydotenv
+pysimplegui
